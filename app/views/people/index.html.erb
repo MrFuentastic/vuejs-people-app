@@ -1,4 +1,7 @@
 <div id="app">
+  <ul>
+    <li v-for="error in errors">{{ error }}</li>
+  </ul>
   <h3>People list</h3>
   <h4>Number of people in the people list is: {{ people.length }}</h4>
   <div v-for="person of people" v-on:click="toggleBio(person)">

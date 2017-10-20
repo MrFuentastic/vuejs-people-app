@@ -2,49 +2,35 @@ document.addEventListener("DOMContentLoaded", function(event) {
   var app = new Vue({
     el: '#app',
     data: {
-      people: [
-        {
-          name: "person 1",
-          bio: "person 1 was a person, who was lonely, cause 1 is the loneliest number",
-          bioVisible: false
-        },
-        {
-          name: "person 2",
-          bio: "person 2 was also lonely, until person 1 and person 2 found each other, but they were still lonely, cause 2 is the second loneliest number, after 1",
-          bioVisible: false
-        },
-        {
-          name: "cookie monster",
-          bio: "addicted to love. its in the cookies. they were made with love.",
-          bioVisible: false
-        },
-        {
-          name: "the Count",
-          bio: "called the Count because he loves to *****",
-          bioVisible: false
-        },
-      ],
+      people: [],
       newPersonName: "",
-      newPersonBio: ""
+      newPersonBio: "",
+      errors: []
     },
     mounted: function() {
-
+      $.get('/api/v1/people.json', function(data) {
+        this.people = data;
+      }.bind(this));
     },
     methods: {
       toggleBio: function(currentPerson) {
         currentPerson.bioVisible = !currentPerson.bioVisible;
       },
       addNewPerson: function() {
-        if (this.newPersonName !== "" && this.newPersonBio !== "") {
-          let newPerson = {
-            name: this.newPersonName,
-            bio: this.newPersonBio,
-            bioVisible: false
-          };
+        
+        var params = {
+          name: this.newPersonName,
+          bio: this.newPersonBio
+        };
+        $.post('/api/v1/people.json', params, function(newPerson) {
           this.people.push(newPerson);
-        }
-        this.newPersonName = "";
-        this.newPersonBio = "";
+          this.newPersonName = "";
+          this.newPersonBio = "";
+          this.errors = [];
+        }.bind(this)).fail(function(response) {
+          this.errors = response.responseJSON.errors;
+        }.bind(this));
+        
       },
       deletePerson: function(currentPerson) {
         let index = this.people.indexOf(currentPerson);
