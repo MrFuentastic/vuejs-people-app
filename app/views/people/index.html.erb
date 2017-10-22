@@ -1,16 +1,28 @@
 <div id="app">
+  <div>
+    Search: <input v-model="searchTermFilter" list="names">
+    <datalist id="names">
+      <option v-for="person in people">{{ person.name }}</option>
+    </datalist>
+    <button v-on:click="setSortAttribute('name')">Sort by Name</button>
+    <button v-on:click="setSortAttribute('bio')">Sort by Bio</button>
+  </div>  
   <ul>
     <li v-for="error in errors">{{ error }}</li>
   </ul>
   <h3>People list</h3>
   <h4>Number of people in the people list is: {{ people.length }}</h4>
-  <div v-for="person of people" v-on:click="toggleBio(person)">
-    <h4>Name:</h4> {{ person.name }} ------> <a href="#" v-on:click="deletePerson(person)">Delete Me</a>
-    <div v-if="person.bioVisible">
-      <h4>Bio:</h4> {{ person.bio }}
+  
+  <transition-group name="bounceLeft">
+    <div v-for="person of modifiedPeople" v-on:click="toggleBio(person)" v-if="isValidPerson(person)" v-bind:key="person.id">
+      <h4>Name:</h4> {{ person.name }} ------> <a href="#" v-on:click="deletePerson(person)">Delete Me</a>
+      <div v-if="person.bioVisible">
+        <h4>Bio:</h4> {{ person.bio }}
+      </div>
+      <br>
     </div>
-    <br>
-  </div>
+  </transition-group>
+
   <br>
     <h3>New Person Form</h3>
     Name: <input v-model="newPersonName"><br>

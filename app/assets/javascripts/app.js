@@ -5,7 +5,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
       people: [],
       newPersonName: "",
       newPersonBio: "",
-      errors: []
+      errors: [],
+      searchTermFilter: "",
+      sortAttribute: "name",
+      sortAscending: true
     },
     mounted: function() {
       $.get('/api/v1/people.json', function(data) {
@@ -20,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         
         var params = {
           name: this.newPersonName,
-          bio: this.newPersonBio
+          bio: this.newPersonBioC
         };
         $.post('/api/v1/people.json', params, function(newPerson) {
           this.people.push(newPerson);
@@ -33,12 +36,40 @@ document.addEventListener("DOMContentLoaded", function(event) {
         
       },
       deletePerson: function(currentPerson) {
-        let index = this.people.indexOf(currentPerson);
-        this.people.splice(index, 1);
+        $.ajax({
+          type: 'DELETE',
+          url: `/api/v1/people${currentPerson.id.json}`,
+          contentType: 'application/json',
+          success: function(newPeople) {
+            this.people = newPeople;
+          }.bind(this)
+        });
+      },
+      isValidPerson: function(inputPerson) {
+        var validName = inputPerson.name.toLowerCase().indexOf(this.searchTermFilter.toLowerCase()) !== -1;
+        var validBio = inputPerson.bio.toLowerCase().indexOf(this.searchTermFilter.toLowerCase()) !== -1;
+        return validName && validBio;
+      },
+      setSortAttribute: function(inputAttribute) {
+        if (inputAttribute !== this.sortAttribute) {
+          this.sortAscending = true;
+        } else {
+          this.sortAscending = !this.sortAscending; 
+        }
+        
+        this.sortAttribute = inputAttribute;
       }
     },
     computed: {
-
+      modifiedPeople: function() {
+        return this.people.sort(function(person1, person2) {
+          if (this.sortAscending) {
+            return person1[this.sortAttribute].localeCompare(person2[this.sortAttribute]);
+          } else {
+            return person2[this.sortAttribute].localeCompare(person1[this.sortAttribute]);
+          }
+        }.bind(this));
+      }
     }
   });
 });
